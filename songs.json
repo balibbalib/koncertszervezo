@@ -1,7 +1,6 @@
 [
   {"name": "Itt állok előtted", "time": "3:00", "flute": ""},
   {"name": "Áldjad én lelkem a dicsőség erős királyát", "time": "3:00", "flute": "normal"},
-  {"name": "Szél sodorja, szél zilálja", "time": "3:00", "flute": ""},
   {"name": "Jézus életem erőm békém", "time": "3:40", "flute": "normal"},
   {"name": "Nincs más Isten", "time": "4:10", "flute": "normal"},
   {"name": "Kicsiny kis fényemmel", "time": "2:24", "flute": ""},
@@ -23,7 +22,6 @@
   {"name": "Életem csak kegyelem", "time": "3:40", "flute": ""},
   {"name": "Amim van", "time": "3:48", "flute": ""},
   {"name": "Örvendjetek, mert Isten úgy szeret", "time": "4:00", "flute": "high"},
-  {"name": "Uram Tehozzád futok", "time": "3:33", "flute": "normal"},
   {"name": "Tégy Uram engem áldássá", "time": "2:56", "flute": "high"},
   {"name": "Mindennap veled leszek", "time": "5:00", "flute": ""},
   {"name": "Szél sodorja, szél zilálja", "time": "3:00", "flute": ""},
@@ -35,7 +33,6 @@
   {"name": "Úr lesz a Jézus mindenütt", "time": "2:52", "flute": "normal"},
   {"name": "Itt van Isten köztünk", "time": "5:45", "flute": "normal"},
   {"name": "Jöjj, királyom Jézusom", "time": "3:00", "flute": ""},
-  {"name": "Jézus életem erőm békém", "time": "3:25", "flute": "normal"},
   {"name": "Amint vagyok sok bűn alatt", "time": "3:15", "flute": ""},
   {"name": "Isten élő lelke jöjj", "time": "3:10", "flute": ""}
 ]
