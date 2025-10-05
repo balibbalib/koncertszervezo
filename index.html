@@ -195,8 +195,8 @@ function createSongElement(song) {
   div.draggable = true;
 
   let text = `${song.name} (${song.time})`;
-  if (song.flute === "normal") text += " 🎵";
-  if (song.flute === "high") text += " 🎵⬆️";
+  if (song.flute === "normal") text += " 🪈";
+  if (song.flute === "high") text += " 🪈⬆️";
 
   div.innerText = text;
   div.dataset.time = song.time;
