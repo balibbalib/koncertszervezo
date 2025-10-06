@@ -27,10 +27,11 @@
 
   .title {
     text-align: center;
-    font-size: 1.8em;
+    font-size: 2em;
     font-weight: bold;
     color: #ffcc66;
     margin: 20px 0;
+    cursor: pointer;
   }
 
   .mode-select {
@@ -94,7 +95,7 @@
   }
 
   .section {
-    width: fit-content;
+    margin-bottom: 20px;
     padding: 10px;
     background-color: #1e1e1e;
     border-radius: 8px;
@@ -149,9 +150,12 @@
   /* Nyomtatási nézet */
   @media print {
     body { background: white; color: black; }
-    .mode-select, .actions, .song-pool { display: none; }
+    .mode-select, .actions, .song-pool { display: none !important; }
     .header { background: none; }
-    .worship-sections { box-shadow: none; }
+    .title { color: black; font-size: 2.2em; margin-bottom: 25px; }
+    .section { border: 1px solid #ccc; margin-bottom: 10px; }
+    .section h3 { color: black; border: none; font-size: 1.2em; }
+    .song-item { background: none; border: none; padding: 4px 0; }
   }
 
   @media (max-width: 768px) {
@@ -178,33 +182,31 @@
 <div class="summary" id="summary"></div>
 
 <div class="actions">
-  <button onclick="window.print()">🖨️ Nyomtatás</button>
+  <button id="printBtn">🖨️ Nyomtatás</button>
   <button id="shareBtn">📤 Megosztás</button>
 </div>
 
 <script>
 let setlist = JSON.parse(localStorage.getItem('finalSetlist')) || { songs: [] };
 
-// Cím szerkesztése
+// Cím megadása
 document.getElementById('eventTitle').addEventListener('click', () => {
   const name = prompt('Add meg az esemény nevét:', document.getElementById('eventTitle').innerText);
   if (name) document.getElementById('eventTitle').innerText = name;
 });
 
-// Koncert nézet
+// 🎤 Koncert nézet
 document.getElementById('concertBtn').addEventListener('click', () => {
   const content = document.getElementById('content');
   content.innerHTML = `
-    <div class="layout">
-        <div class="section">
-            <h3>Koncert Setlist</h3>
-            ${setlist.songs.map(s => `<div class="song-item">${s}</div>`).join('')}
-        </div>
+    <div class="section">
+      <h3>Koncert Setlist</h3>
+      ${setlist.songs.map(s => `<div class="song-item">${s}</div>`).join('')}
     </div>`;
   updateSummary();
 });
 
-// Istentisztelet nézet (drag & drop + mobil kompatibilis)
+// 🙏 Istentisztelet nézet
 document.getElementById('worshipBtn').addEventListener('click', () => {
   const content = document.getElementById('content');
   const parts = ['Gyülekező ének', 'Kezdő ének', 'Fennálló ének', 'Ráfelelő ének', 'Záróének'];
@@ -218,7 +220,7 @@ document.getElementById('worshipBtn').addEventListener('click', () => {
 
       <div class="worship-sections" id="sections">
         ${parts.map(p => `
-          <div class="section">
+          <div class="section" data-part="${p}">
             <h3>${p}</h3>
             <div class="dropzone" data-part="${p}"></div>
           </div>`).join('')}
@@ -230,6 +232,7 @@ document.getElementById('worshipBtn').addEventListener('click', () => {
   updateSummary();
 });
 
+// ⚙️ Drag & Drop és mobil támogatás
 function enableDragAndDrop() {
   const items = document.querySelectorAll('.song-item');
   const zones = document.querySelectorAll('.dropzone');
@@ -241,7 +244,7 @@ function enableDragAndDrop() {
     });
     item.addEventListener('dragend', () => item.classList.remove('dragging'));
 
-    // Mobil: kattintásos hozzáadás
+    // Mobil: kattintásra is beugrik a következő üres helyre
     item.addEventListener('click', () => {
       const empty = Array.from(zones).find(z => !z.querySelector('.song-item'));
       if (empty) {
@@ -269,17 +272,25 @@ function enableDragAndDrop() {
       zone.appendChild(newEl);
       zone.classList.remove('over');
 
+      // Az elérhető dalok közül törli, ha áthelyezték
       const dragged = Array.from(document.querySelectorAll('.song-item')).find(i => i.innerText === text);
       if (dragged && dragged.parentElement.id === 'songPool') dragged.remove();
     });
   });
 }
 
-function updateSummary() {
-  document.getElementById('summary').innerText = `📊 Összesen: ${setlist.totalCount} dal, ${setlist.totalTime}`;
-}
+// 🧾 Nyomtatás — üres szakaszok elrejtése
+document.getElementById('printBtn').addEventListener('click', () => {
+  const sections = document.querySelectorAll('.section');
+  sections.forEach(sec => {
+    const zone = sec.querySelector('.dropzone');
+    if (zone && zone.children.length === 0) sec.style.display = 'none';
+    else sec.style.display = 'block';
+  });
+  window.print();
+});
 
-// Megosztás
+// 📤 Megosztás
 document.getElementById('shareBtn').addEventListener('click', async () => {
   const title = document.getElementById('eventTitle').innerText;
   const songs = Array.from(document.querySelectorAll('.song-item')).map(s => s.innerText);
@@ -292,6 +303,11 @@ document.getElementById('shareBtn').addEventListener('click', async () => {
     alert('✅ A setlist vágólapra másolva!');
   }
 });
+
+// Összegzés
+function updateSummary() {
+  document.getElementById('summary').innerText = `📊 Összesen: ${setlist.totalCount} dal, ${setlist.totalTime}`;
+}
 </script>
 </body>
 </html>
