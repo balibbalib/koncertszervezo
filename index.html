@@ -244,7 +244,7 @@ function getSetlistData() {
   const songs = songsInSet.map(s => {
     const [min, sec] = s.dataset.time.split(':').map(Number);
     totalSeconds += min * 60 + sec;
-    return `${s.dataset.name} (${s.dataset.time})`;
+    return s.innerText;
   });
 
   const minutes = Math.floor(totalSeconds / 60);
