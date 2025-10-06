@@ -176,6 +176,7 @@
     <button class="primary" id="addSlot">+ Hely hozzáadása</button>
     <button class="danger" id="clearSetlist">🗑️ Setlist törlése</button>
     <button class="primary" id="shareSetlist">📤 Megosztás / Másolás</button>
+    <button class="primary" id="finalize">➡️ Tovább a tervezéshez</button>
     
     <div class="summary" id="summary">Összesen: 0 dal, 0:00</div>
   </div>
@@ -309,6 +310,13 @@ fetch('songs.json')
 // Alap 5 hely
 for (let i = 0; i < 5; i++) setList.appendChild(createPlaceholder());
 addSlotBtn.addEventListener('click', () => setList.appendChild(createPlaceholder()));
+
+document.getElementById('finalize').addEventListener('click', () => {
+  const data = getSetlistData();
+  localStorage.setItem('finalSetlist', JSON.stringify(data));
+  window.location.href = 'plan.html';
+});
+
 </script>
 
 </body>
