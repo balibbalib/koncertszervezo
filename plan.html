@@ -303,7 +303,7 @@ function updateSummary() {
 // Megosztás
 document.getElementById('shareBtn').addEventListener('click', async () => {
   const title = document.getElementById('eventTitle').innerText;
-  const songs = Array.from(document.querySelectorAll('.song-item')).map(s => s.innerText);
+  const songs = Array.from(document.querySelectorAll('.song-item')).map(s => s);
   const text = `🎶 ${title} 🎶\n\n${songs.join('\n')}\n\n📊 Összesen: ${setlist.totalCount} dal, ${setlist.totalTime}`;
 
   if (navigator.share) {
