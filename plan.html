@@ -197,7 +197,7 @@ document.getElementById('concertBtn').addEventListener('click', () => {
   content.innerHTML = `
     <div class="section">
       <h3>Koncert Setlist</h3>
-      ${setlist.songs.map(s => `<div class="song-item">${s.display}</div>`).join('')}
+      ${setlist.songs.map(s => `<div class="song-item">${s}</div>`).join('')}
     </div>`;
   updateSummary();
 });
@@ -211,7 +211,7 @@ document.getElementById('worshipBtn').addEventListener('click', () => {
     <div class="layout">
       <div class="song-pool" id="songPool">
         <h3>🎵 Elérhető dalok</h3>
-        ${setlist.songs.map(s => `<div class="song-item" draggable="true" data-display="${s.display}">${s.display}</div>`).join('')}
+        ${setlist.songs.map(s => `<div class="song-item" draggable="true" data-display="${s}">${s}</div>`).join('')}
       </div>
 
       <div class="worship-sections" id="sections">
