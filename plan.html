@@ -178,9 +178,40 @@
     .layout { flex-direction: column; align-items: center; }
     .song-pool, .worship-sections { width: 90%; }
   }
+
+  body.print-mode {
+  background: white;
+  color: black;
+}
+
+body.print-mode .choice-buttons,
+body.print-mode .actions,
+body.print-mode .song-pool {
+  display: none;
+}
+
+body.print-mode .header {
+  background: none;
+  padding: 5px 0 0 0;
+}
+
+body.print-mode .worship-sections {
+  box-shadow: none;
+}
+
+body.print-mode .dropzone {
+  border: none;
+}
+
+body.print-mode .title {
+  color: black;
+  font-size: 2em;
+  margin: 5px 0 15px 0;
+}
+
 </style>
 </head>
-<body>
+<body id="pageBody">
 
 <div class="header">
     <a href="index.html"><img src="https://drive.google.com/thumbnail?id=1aaPOxP4OkfsfMd8t3QcSAI5TIx5YN4pl&sz=800" alt="Keleti Reform Logo"></a>
@@ -199,7 +230,6 @@
 
 <div class="actions">
   <button onclick="window.print()">🖨️ Nyomtatás</button>
-  <button id="saveAsImage">🖼️ Kép mentése</button>
   <button id="shareBtn">📤 Megosztás</button>
   <button onclick="window.location.href = 'index.html'">⬅️ Vissza</button>
 </div>
@@ -333,17 +363,28 @@ window.addEventListener('beforeprint', hideEmptyWorshipSections);
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
-document.getElementById("saveAsImage").addEventListener("click", () => {
-  const content = document.getElementById("content"); // amit lementenél
-  html2canvas(content, { scale: 2 }).then(canvas => {
+document.getElementById("saveAsImage").addEventListener("click", async () => {
+  const body = document.getElementById("pageBody");
+  const content = document.getElementById("content");
+
+  // Print stílus aktiválása
+  body.classList.add("print-mode");
+
+  // Kis késleltetés, hogy a stílusok biztosan érvényesüljenek
+  await new Promise(resolve => setTimeout(resolve, 300));
+
+  // Lefényképezzük a nézetet
+  html2canvas(content, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
     const link = document.createElement("a");
     link.download = "setlist.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
+
+    // Print mód kikapcsolása
+    body.classList.remove("print-mode");
   });
 });
 </script>
 
 </body>
 </html>
-
