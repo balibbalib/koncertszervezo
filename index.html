@@ -237,8 +237,8 @@ function createPlaceholder() {
 }
 
 function getSetlistData() {
-  const songsInSet = Array.from(setList.children)
-    .filter(c => c.classList.contains('song'));
+  const songsInSet = Array.from(setList.children);
+    //.filter(c => c.classList.contains('song'));
 
   let totalSeconds = 0;
   const songs = songsInSet.map(s => {
