@@ -245,7 +245,6 @@ function getSetlistData() {
     const [min, sec] = s.dataset.time.split(':').map(Number);
     totalSeconds += min * 60 + sec;
     return `${s.dataset.name} (${s.dataset.time})`;
-    console.log(s.innerText);
     return s.innerText;
   });
 
