@@ -95,6 +95,7 @@
   }
 
   .section {
+    width: fit-content;
     margin-bottom: 20px;
     padding: 10px;
     background-color: #1e1e1e;
@@ -195,13 +196,15 @@ document.getElementById('eventTitle').addEventListener('click', () => {
   if (name) document.getElementById('eventTitle').innerText = name;
 });
 
-// 🎤 Koncert nézet
+// Koncert nézet
 document.getElementById('concertBtn').addEventListener('click', () => {
   const content = document.getElementById('content');
   content.innerHTML = `
-    <div class="section">
-      <h3>Koncert Setlist</h3>
-      ${setlist.songs.map(s => `<div class="song-item">${s}</div>`).join('')}
+    <div class="layout">
+        <div class="section">
+            <h3>Koncert Setlist</h3>
+            ${setlist.songs.map(s => `<div class="song-item">${s}</div>`).join('')}
+        </div>
     </div>`;
   updateSummary();
 });
