@@ -27,32 +27,44 @@
 
   .title {
     text-align: center;
-    font-size: 2em;
+    font-size: 1.8em;
     font-weight: bold;
     color: #ffcc66;
     margin: 20px 0;
-    cursor: pointer;
   }
 
-  .mode-select {
-    text-align: center;
-    margin: 20px;
+  .choice-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin: 20px 0;
   }
 
-  .mode-select button {
-    background-color: #4da6ff;
-    color: #000;
-    font-weight: bold;
+  .choice-buttons button {
+    padding: 20px 40px;
     border: none;
-    padding: 12px 20px;
-    margin: 10px;
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
-    transition: background 0.2s;
+    font-size: 1.2em;
+    font-weight: bold;
+    transition: background 0.3s;
   }
 
-  .mode-select button:hover {
-    background-color: #66b3ff;
+  .concert { background-color: #4da6ff; color: #0d0d0d; }
+  .worship { background-color: #ffcc66; color: #0d0d0d; }
+
+  .concert:hover { background-color: #66b3ff; }
+  .worship:hover { background-color: #ffd27f; }
+
+  input[type="text"] {
+    width: 80%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    margin: 10px auto;
+    display: block;
+    font-size: 1em;
   }
 
   .layout {
@@ -96,7 +108,6 @@
 
   .section {
     width: fit-content;
-    margin-bottom: 20px;
     padding: 10px;
     background-color: #1e1e1e;
     border-radius: 8px;
@@ -151,12 +162,16 @@
   /* Nyomtatási nézet */
   @media print {
     body { background: white; color: black; }
-    .mode-select, .actions, .song-pool { display: none !important; }
-    .header { background: none; }
-    .title { color: black; font-size: 2.2em; margin-bottom: 25px; }
-    .section { border: 1px solid #ccc; margin-bottom: 10px; }
-    .section h3 { color: black; border: none; font-size: 1.2em; }
-    .song-item { background: none; border: none; padding: 4px 0; }
+    .choice-buttons, .actions, .song-pool { display: none; }
+    .header { background: none;
+              padding: 5px 0 0 0; /* fentebb kerül */ }
+    .worship-sections { box-shadow: none; }
+    .dropzone {border: none;}
+    .title {
+    color: black;
+    font-size: 2em;
+    margin: 5px 0 15px 0; /* kisebb margó, fentebb kerül */}
+    .hide-print { display: none !important; }
   }
 
   @media (max-width: 768px) {
@@ -168,12 +183,12 @@
 <body>
 
 <div class="header">
-  <img src="https://drive.google.com/thumbnail?id=1aaPOxP4OkfsfMd8t3QcSAI5TIx5YN4pl&sz=800" alt="Keleti Reform Logo">
+    <a href="index.html"><img src="https://drive.google.com/thumbnail?id=1aaPOxP4OkfsfMd8t3QcSAI5TIx5YN4pl&sz=800" alt="Keleti Reform Logo"></a>
 </div>
 
-<div class="mode-select">
-  <button id="concertBtn">🎤 Koncert</button>
-  <button id="worshipBtn">🙏 Istentisztelet</button>
+<div class="choice-buttons">
+  <button class="concert" id="concertBtn">🎤 Koncert</button>
+  <button class="worship" id="worshipBtn">⛪ Istentisztelet</button>
 </div>
 
 <div class="title" id="eventTitle">Esemény megnevezése</div>
@@ -183,14 +198,15 @@
 <div class="summary" id="summary"></div>
 
 <div class="actions">
-  <button id="printBtn">🖨️ Nyomtatás</button>
+  <button onclick="window.print()">🖨️ Nyomtatás</button>
   <button id="shareBtn">📤 Megosztás</button>
+  <button onclick="window.location.href = 'index.html'">⬅️ Vissza</button>
 </div>
 
 <script>
 let setlist = JSON.parse(localStorage.getItem('finalSetlist')) || { songs: [] };
 
-// Cím megadása
+// Cím szerkesztése
 document.getElementById('eventTitle').addEventListener('click', () => {
   const name = prompt('Add meg az esemény nevét:', document.getElementById('eventTitle').innerText);
   if (name) document.getElementById('eventTitle').innerText = name;
@@ -209,7 +225,7 @@ document.getElementById('concertBtn').addEventListener('click', () => {
   updateSummary();
 });
 
-// 🙏 Istentisztelet nézet
+// Istentisztelet nézet (drag & drop + mobil kompatibilis)
 document.getElementById('worshipBtn').addEventListener('click', () => {
   const content = document.getElementById('content');
   const parts = ['Gyülekező ének', 'Kezdő ének', 'Fennálló ének', 'Ráfelelő ének', 'Záróének'];
@@ -223,7 +239,7 @@ document.getElementById('worshipBtn').addEventListener('click', () => {
 
       <div class="worship-sections" id="sections">
         ${parts.map(p => `
-          <div class="section" data-part="${p}">
+          <div class="section">
             <h3>${p}</h3>
             <div class="dropzone" data-part="${p}"></div>
           </div>`).join('')}
@@ -235,7 +251,6 @@ document.getElementById('worshipBtn').addEventListener('click', () => {
   updateSummary();
 });
 
-// ⚙️ Drag & Drop és mobil támogatás
 function enableDragAndDrop() {
   const items = document.querySelectorAll('.song-item');
   const zones = document.querySelectorAll('.dropzone');
@@ -247,7 +262,7 @@ function enableDragAndDrop() {
     });
     item.addEventListener('dragend', () => item.classList.remove('dragging'));
 
-    // Mobil: kattintásra is beugrik a következő üres helyre
+    // Mobil: kattintásos hozzáadás
     item.addEventListener('click', () => {
       const empty = Array.from(zones).find(z => !z.querySelector('.song-item'));
       if (empty) {
@@ -275,25 +290,17 @@ function enableDragAndDrop() {
       zone.appendChild(newEl);
       zone.classList.remove('over');
 
-      // Az elérhető dalok közül törli, ha áthelyezték
       const dragged = Array.from(document.querySelectorAll('.song-item')).find(i => i.innerText === text);
       if (dragged && dragged.parentElement.id === 'songPool') dragged.remove();
     });
   });
 }
 
-// 🧾 Nyomtatás — üres szakaszok elrejtése
-document.getElementById('printBtn').addEventListener('click', () => {
-  const sections = document.querySelectorAll('.section');
-  sections.forEach(sec => {
-    const zone = sec.querySelector('.dropzone');
-    if (zone && zone.children.length === 0) sec.style.display = 'none';
-    else sec.style.display = 'block';
-  });
-  window.print();
-});
+function updateSummary() {
+  document.getElementById('summary').innerText = `📊 Összesen: ${setlist.totalCount} dal, ${setlist.totalTime}`;
+}
 
-// 📤 Megosztás
+// Megosztás
 document.getElementById('shareBtn').addEventListener('click', async () => {
   const title = document.getElementById('eventTitle').innerText;
   const songs = Array.from(document.querySelectorAll('.song-item')).map(s => s.innerText);
@@ -307,10 +314,19 @@ document.getElementById('shareBtn').addEventListener('click', async () => {
   }
 });
 
-// Összegzés
-function updateSummary() {
-  document.getElementById('summary').innerText = `📊 Összesen: ${setlist.totalCount} dal, ${setlist.totalTime}`;
+function hideEmptyWorshipSections() {
+  const sections = document.querySelectorAll('.worship-sections .section');
+  sections.forEach(section => {
+    const dropzone = section.querySelector('.dropzone');
+    if (dropzone && dropzone.children.length === 0) {
+      section.classList.add('hide-print');
+    } else {
+      section.classList.remove('hide-print'); // ha újratöltés után lenne benne dal
+    }
+  });
 }
+
+window.addEventListener('beforeprint', hideEmptyWorshipSections);
 </script>
 </body>
 </html>
