@@ -237,14 +237,14 @@ function createPlaceholder() {
 }
 
 function getSetlistData() {
-  const songsInSet = Array.from(setList.children);
-    //.filter(c => c.classList.contains('song'));
+  const songsInSet = Array.from(setList.children)
+    .filter(c => c.classList.contains('song'));
 
   let totalSeconds = 0;
   const songs = songsInSet.map(s => {
     const [min, sec] = s.dataset.time.split(':').map(Number);
     totalSeconds += min * 60 + sec;
-    return `${s.dataset.name} (${s.dataset.time})`;
+    //return `${s.dataset.name} (${s.dataset.time})`;
     return s.innerText;
   });
 
