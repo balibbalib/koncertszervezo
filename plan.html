@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Koncertterv - Keleti Reform</title>
+<title>Istenitisztelet / Koncert terv - Keleti Reform</title>
 <style>
   body {
     background-color: #0d0d0d;
@@ -54,14 +54,50 @@
     background-color: #66b3ff;
   }
 
-  .section {
-    margin: 20px auto;
-    width: 90%;
-    max-width: 600px;
+  .layout {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 0 20px;
+  }
+
+  .song-pool, .worship-sections {
     background-color: #1b1b1b;
     padding: 15px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(61,108,185,0.3);
+  }
+
+  .song-pool {
+    width: 280px;
+    min-height: 400px;
+    overflow-y: auto;
+  }
+
+  .song-item {
+    background-color: #242424;
+    padding: 8px 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    cursor: grab;
+  }
+
+  .song-item:hover {
+    background-color: #333;
+  }
+
+  .worship-sections {
+    flex: 1;
+    min-width: 300px;
+    max-width: 700px;
+  }
+
+  .section {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #1e1e1e;
+    border-radius: 8px;
   }
 
   .section h3 {
@@ -71,11 +107,23 @@
     margin-bottom: 10px;
   }
 
-  .song-item {
+  .dropzone {
     background-color: #242424;
-    padding: 8px 10px;
-    margin: 4px 0;
+    border: 2px dashed #4da6ff;
     border-radius: 6px;
+    min-height: 40px;
+    padding: 8px;
+  }
+
+  .dropzone.over {
+    background-color: #2e2e2e;
+  }
+
+  .summary {
+    text-align: center;
+    color: #ffcc66;
+    font-weight: 500;
+    margin: 15px;
   }
 
   .actions {
@@ -98,33 +146,17 @@
     background-color: #66b3ff;
   }
 
-  .summary {
-    text-align: center;
-    color: #ffcc66;
-    font-weight: 500;
-    margin-top: 15px;
+  /* Nyomtatási nézet */
+  @media print {
+    body { background: white; color: black; }
+    .mode-select, .actions, .song-pool { display: none; }
+    .header { background: none; }
+    .worship-sections { box-shadow: none; }
   }
 
-  /* 🖨️ Nyomtatási nézet */
-  @media print {
-    body {
-      background: white;
-      color: black;
-    }
-
-    .header {
-      background: none;
-    }
-
-    .mode-select,
-    .actions {
-      display: none;
-    }
-
-    .section {
-      box-shadow: none;
-      border: none;
-    }
+  @media (max-width: 768px) {
+    .layout { flex-direction: column; align-items: center; }
+    .song-pool, .worship-sections { width: 90%; }
   }
 </style>
 </head>
@@ -153,60 +185,111 @@
 <script>
 let setlist = JSON.parse(localStorage.getItem('finalSetlist')) || { songs: [] };
 
-function renderSimple() {
+// Cím szerkesztése
+document.getElementById('eventTitle').addEventListener('click', () => {
+  const name = prompt('Add meg az esemény nevét:', document.getElementById('eventTitle').innerText);
+  if (name) document.getElementById('eventTitle').innerText = name;
+});
+
+// Koncert nézet
+document.getElementById('concertBtn').addEventListener('click', () => {
   const content = document.getElementById('content');
   content.innerHTML = `
     <div class="section">
-      <h3>Setlist</h3>
+      <h3>Koncert Setlist</h3>
       ${setlist.songs.map(s => `<div class="song-item">${s.display}</div>`).join('')}
-    </div>
-  `;
+    </div>`;
   updateSummary();
-}
+});
 
-function renderWorship() {
+// Istentisztelet nézet (drag & drop + mobil kompatibilis)
+document.getElementById('worshipBtn').addEventListener('click', () => {
   const content = document.getElementById('content');
   const parts = ['Gyülekező ének', 'Kezdő ének', 'Fennálló ének', 'Ráfelelő ének', 'Záróének'];
 
-  content.innerHTML = parts.map(part => `
-    <div class="section">
-      <h3>${part}</h3>
-      <div class="song-slot">${setlist.songs.shift() ? `<div class="song-item">${setlist.songs.shift().display}</div>` : ''}</div>
-    </div>
-  `).join('');
+  content.innerHTML = `
+    <div class="layout">
+      <div class="song-pool" id="songPool">
+        <h3>🎵 Elérhető dalok</h3>
+        ${setlist.songs.map(s => `<div class="song-item" draggable="true" data-display="${s.display}">${s.display}</div>`).join('')}
+      </div>
 
+      <div class="worship-sections" id="sections">
+        ${parts.map(p => `
+          <div class="section">
+            <h3>${p}</h3>
+            <div class="dropzone" data-part="${p}"></div>
+          </div>`).join('')}
+      </div>
+    </div>
+  `;
+
+  enableDragAndDrop();
   updateSummary();
+});
+
+function enableDragAndDrop() {
+  const items = document.querySelectorAll('.song-item');
+  const zones = document.querySelectorAll('.dropzone');
+
+  items.forEach(item => {
+    item.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', item.dataset.display);
+      setTimeout(() => item.classList.add('dragging'), 0);
+    });
+    item.addEventListener('dragend', () => item.classList.remove('dragging'));
+
+    // Mobil: kattintásos hozzáadás
+    item.addEventListener('click', () => {
+      const empty = Array.from(zones).find(z => !z.querySelector('.song-item'));
+      if (empty) {
+        const newEl = document.createElement('div');
+        newEl.className = 'song-item';
+        newEl.innerText = item.dataset.display;
+        empty.appendChild(newEl);
+        item.remove();
+      }
+    });
+  });
+
+  zones.forEach(zone => {
+    zone.addEventListener('dragover', e => {
+      e.preventDefault();
+      zone.classList.add('over');
+    });
+    zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      const text = e.dataTransfer.getData('text/plain');
+      const newEl = document.createElement('div');
+      newEl.className = 'song-item';
+      newEl.innerText = text;
+      zone.appendChild(newEl);
+      zone.classList.remove('over');
+
+      const dragged = Array.from(document.querySelectorAll('.song-item')).find(i => i.innerText === text);
+      if (dragged && dragged.parentElement.id === 'songPool') dragged.remove();
+    });
+  });
 }
 
 function updateSummary() {
-  document.getElementById('summary').innerText = 
-    `📊 Összesen: ${setlist.totalCount} dal, ${setlist.totalTime}`;
+  document.getElementById('summary').innerText = `📊 Összesen: ${setlist.totalCount} dal, ${setlist.totalTime}`;
 }
 
-// Megosztás / vágólapra másolás
+// Megosztás
 document.getElementById('shareBtn').addEventListener('click', async () => {
-  const text = `🎶 ${document.getElementById('eventTitle').innerText} 🎶\n\n${
-    setlist.songs.map(s => s.display).join('\n')
-  }\n\n📊 Összesen: ${setlist.totalCount} dal, ${setlist.totalTime}`;
+  const title = document.getElementById('eventTitle').innerText;
+  const songs = Array.from(document.querySelectorAll('.song-item')).map(s => s.innerText);
+  const text = `🎶 ${title} 🎶\n\n${songs.join('\n')}\n\n📊 Összesen: ${setlist.totalCount} dal, ${setlist.totalTime}`;
 
   if (navigator.share) {
-    await navigator.share({ title: 'Keleti Reform', text });
+    await navigator.share({ title, text });
   } else {
     await navigator.clipboard.writeText(text);
     alert('✅ A setlist vágólapra másolva!');
   }
 });
-
-// Esemény elnevezése
-document.getElementById('eventTitle').addEventListener('click', () => {
-  const name = prompt('Add meg az esemény nevét:', 'Új esemény');
-  if (name) document.getElementById('eventTitle').innerText = name;
-});
-
-// Gombok
-document.getElementById('concertBtn').addEventListener('click', renderSimple);
-document.getElementById('worshipBtn').addEventListener('click', renderWorship);
 </script>
-
 </body>
 </html>
