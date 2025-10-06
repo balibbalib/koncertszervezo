@@ -230,7 +230,6 @@ body.print-mode .title {
 
 <div class="actions">
   <button onclick="window.print()">🖨️ Nyomtatás</button>
-  <button id="saveAsImage">🖼️ Kép mentése (PDF nézetben)</button>
   <button id="shareBtn">📤 Megosztás</button>
   <button onclick="window.location.href = 'index.html'">⬅️ Vissza</button>
 </div>
@@ -360,33 +359,7 @@ function hideEmptyWorshipSections() {
 
 window.addEventListener('beforeprint', hideEmptyWorshipSections);
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
-<script>
-document.getElementById("saveAsImage").addEventListener("click", async () => {
-  const body = document.getElementById("pageBody");
-  const content = document.getElementById("content");
-
-  // Print stílus aktiválása
-  body.classList.add("print-mode");
-
-  // Kis késleltetés, hogy a stílusok biztosan érvényesüljenek
-  await new Promise(resolve => setTimeout(resolve, 300));
-
-  // Lefényképezzük a nézetet
-  html2canvas(content, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
-    const link = document.createElement("a");
-    link.download = "setlist.png";
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-
-    // Print mód kikapcsolása
-    body.classList.remove("print-mode");
-  });
-});
-</script>
-
 </body>
 </html>
+
 
